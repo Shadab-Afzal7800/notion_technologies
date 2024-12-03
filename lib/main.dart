@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:notion_technologies_task/controller/menu_list_provider.dart';
 import 'package:notion_technologies_task/view/menu_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const NotionApp());
@@ -11,9 +12,12 @@ class NotionApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const GetMaterialApp(
-      home: MenuScreen(),
-      debugShowCheckedModeBanner: false,
+    return ChangeNotifierProvider(
+      create: (context) => MenuProvider(),
+      child: const MaterialApp(
+        home: MenuListScreen(),
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
