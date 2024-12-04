@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notion_technologies_task/controller/cart_item_provider.dart';
 import 'package:notion_technologies_task/controller/menu_list_provider.dart';
-import 'package:notion_technologies_task/view/menu_screen.dart';
+import 'package:notion_technologies_task/view/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -19,7 +19,7 @@ class NotionApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider())
       ],
       child: const MaterialApp(
-        home: MenuListScreen(),
+        home: SplashScreen(),
         debugShowCheckedModeBanner: false,
       ),
     );

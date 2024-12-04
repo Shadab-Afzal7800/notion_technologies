@@ -75,6 +75,7 @@ class MenuProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        // ignore: unused_local_variable
         final jsonResponse = json.decode(response.body);
 
         return true;
