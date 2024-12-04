@@ -32,7 +32,7 @@ class CartProvider extends ChangeNotifier {
             .map((item) => CartItem.fromJson(item))
             .toList();
       } else {
-        _error = 'Failed to load cart items';
+        _error = 'Cart Empty';
       }
     } catch (e) {
       _error = 'An error occurred: ${e.toString()}';
