@@ -35,6 +35,7 @@ class CartProvider extends ChangeNotifier {
         _error = 'Cart Empty';
       }
     } catch (e) {
+      print("An error occurred: ${e.toString()}");
       _error = 'An error occurred: ${e.toString()}';
     } finally {
       _isLoading = false;

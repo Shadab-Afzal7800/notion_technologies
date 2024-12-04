@@ -49,6 +49,7 @@ class MenuProvider with ChangeNotifier {
         _error = 'Failed to load menu items';
       }
     } catch (e) {
+      print("An error occurred: ${e.toString()}");
       _error = 'An error occurred: ${e.toString()}';
     } finally {
       _isLoading = false;
