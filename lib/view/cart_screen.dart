@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notion_technologies_task/controller/cart_item_provider.dart';
+import 'package:provider/provider.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CartProvider>(context, listen: false).fetchCartItems('1115');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,219 +36,279 @@ class CartScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Item Section
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 2,
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "MM",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "testing 1",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "₹90",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            color: Colors.deepOrange,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.deepOrange.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.remove),
-                          color: Colors.deepOrange,
-                        ),
-                        Text(
-                          "1",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.add),
-                          color: Colors.deepOrange,
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
+      body: Consumer<CartProvider>(
+        builder: (context, cartProvider, child) {
+          if (cartProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            // Address Section
-            _buildSectionTitle("Selected Address"),
-            const SizedBox(height: 10),
-            _buildInfoCard(
+          if (cartProvider.error != null) {
+            return Center(
               child: Text(
-                "Nagpur, Maharashtra, 440030",
+                cartProvider.error!,
+                style: GoogleFonts.poppins(color: Colors.red),
+              ),
+            );
+          }
+
+          if (cartProvider.cartItems.isEmpty) {
+            return Center(
+              child: Text(
+                "Your cart is empty",
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.black87,
+                  fontSize: 18,
+                  color: Colors.grey,
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
+            );
+          }
 
-            // Billing Section
-            _buildSectionTitle("Bill Details"),
-            const SizedBox(height: 10),
-            _buildInfoCard(
-              child: Column(
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ListView(
                 children: [
-                  _buildBillingRow("1 x testing 1", "₹90"),
-                  const SizedBox(height: 10),
-                  _buildBillingRow("Sub Total", "₹90"),
-                  _buildBillingRow("Delivery Charges", "₹0"),
-                  const Divider(height: 20),
-                  _buildBillingRow(
-                    "Total Bill",
-                    "₹90",
-                    isTotal: true,
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: cartProvider.cartItems.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final cartItem = cartProvider.cartItems[index];
+                      return Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(10),
+                                image: const DecorationImage(
+                                  image: AssetImage('assets/burger.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cartItem.menuName,
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "₹${cartItem.menuPrice}",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.deepOrange.shade50,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    constraints: const BoxConstraints.tightFor(
+                                        width: 30, height: 30),
+                                    padding: EdgeInsets.zero,
+                                    onPressed: cartItem.id ==
+                                            cartProvider.loadingCartId
+                                        ? null
+                                        : () {
+                                            if (cartItem.quantity > 1) {
+                                              Provider.of<CartProvider>(context,
+                                                      listen: false)
+                                                  .updateCartItemQuantity(
+                                                      cartItem.id, false);
+                                            }
+                                          },
+                                    icon: const Icon(Icons.remove, size: 20),
+                                    color: Colors.deepOrange,
+                                  ),
+                                  cartProvider.loadingCartId == cartItem.id
+                                      ? const CircularProgressIndicator(
+                                          color: Colors.deepOrange,
+                                          strokeWidth: 2,
+                                        )
+                                      : Text(
+                                          "${cartItem.quantity}",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                  IconButton(
+                                    constraints: const BoxConstraints.tightFor(
+                                        width: 30, height: 30),
+                                    padding: EdgeInsets.zero,
+                                    onPressed: cartItem.id ==
+                                            cartProvider.loadingCartId
+                                        ? null
+                                        : () {
+                                            Provider.of<CartProvider>(context,
+                                                    listen: false)
+                                                .updateCartItemQuantity(
+                                                    cartItem.id, true);
+                                          },
+                                    icon: const Icon(Icons.add, size: 20),
+                                    color: Colors.deepOrange,
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
                   ),
+                  const SizedBox(height: 20),
+                  _buildSectionTitle("Selected Address"),
+                  const SizedBox(height: 10),
+                  _buildInfoCard(
+                    child: Text(
+                      "Nagpur, Maharashtra, 440030",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSectionTitle("Bill Details"),
+                  const SizedBox(height: 10),
+                  _buildInfoCard(
+                    child: Column(
+                      children: [
+                        ...cartProvider.cartItems.map((item) =>
+                            _buildBillingRow(
+                                "${item.quantity} x ${item.menuName}",
+                                "₹${item.menuPrice * item.quantity}")),
+                        const SizedBox(height: 10),
+                        _buildBillingRow(
+                            "Sub Total", "₹${cartProvider.totalAmount}"),
+                        _buildBillingRow("Delivery Charges", "₹0"),
+                        const Divider(height: 20),
+                        _buildBillingRow(
+                          "Total Bill",
+                          "₹${cartProvider.totalAmount}",
+                          isTotal: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.note_alt_outlined,
+                              color: Colors.black),
+                          label: Text(
+                            "Special Instructions",
+                            style: GoogleFonts.poppins(color: Colors.black),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange.shade100,
+                            foregroundColor: Colors.deepOrange,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      labelText: "Apply Coupon Code",
+                      labelStyle: GoogleFonts.poppins(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.deepOrange),
+                            foregroundColor: Colors.deepOrange,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            "Cash on Delivery",
+                            style: GoogleFonts.poppins(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange.shade100,
+                            foregroundColor: Colors.deepOrange,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            "Pay Now",
+                            style: GoogleFonts.poppins(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.note_alt_outlined,
-                        color: Colors.black),
-                    label: Text(
-                      "Special Instructions",
-                      style: GoogleFonts.poppins(color: Colors.black),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange.shade100,
-                      foregroundColor: Colors.deepOrange,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Coupon Code
-            TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                labelText: "Apply Coupon Code",
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Payment Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.deepOrange),
-                      foregroundColor: Colors.deepOrange,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      "Cash on Delivery",
-                      style: GoogleFonts.poppins(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange.shade100,
-                      foregroundColor: Colors.deepOrange,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      "Pay Now",
-                      style: GoogleFonts.poppins(
-                          color: Colors.black, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

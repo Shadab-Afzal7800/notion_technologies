@@ -1,4 +1,3 @@
-// menu_item_model.dart
 class MenuItem {
   final int id;
   final String name;
